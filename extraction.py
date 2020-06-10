@@ -3,6 +3,19 @@ from pptx import Presentation
 import pandas as pd
 import re
 import os
+from pptx.enum.shapes import MSO_SHAPE_TYPE
+
+
+def getGroupText(groupShape,strings):
+    for shape in groupShape.shapes:
+        if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
+            getGroupText(shape,strings)
+        else:
+            if hasattr(shape, "text"):
+                str = re.findall(r'“(.*?)”', shape.text)
+                strings += str
+    return strings
+
 
 def extraction(filename):
     prs = Presentation(filename)
@@ -28,6 +41,12 @@ def extraction(filename):
 
                 if hasattr(shape, "text"):
                     strings = re.findall(r'“(.*?)”', shape.text)
+                    for s in strings:
+                        result.append([i, title, s])
+
+                if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
+                    strings = []
+                    strings = getGroupText(shape,strings)
                     for s in strings:
                         result.append([i, title, s])
 

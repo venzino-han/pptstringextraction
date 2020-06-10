@@ -30,5 +30,5 @@ def downloadFile (filename):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
     # app.run(host="192.168.153.197",debug=True)

@@ -34,5 +34,5 @@ def extraction(filename):
     df = pd.DataFrame(result)
     newFileName = filename[:-4]+'csv'
     os.remove(filename)
-    df.to_csv(newFileName)
+    df.to_csv(newFileName, encoding="ANSI")
     return newFileName

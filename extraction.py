@@ -19,9 +19,6 @@ def getGroupText(groupShape, strings):
         else:
             if hasattr(shape, "text"):
                 strings += getUiString(shape.text)
-                # str = re.findall(r'“(.*?)”', shape.text)
-                # strings += str
-                # strings += re.findall(r'"(.*?)"', shape.text)
     return strings
 
 
@@ -34,7 +31,10 @@ def extraction(filename):
         if len(slide.shapes) == 0:
             continue
         else:
-            title = slide.shapes.title.text
+            try:
+                title = slide.shapes.title.text
+            except:
+                title = ""
 
             for shape in slide.shapes:
                 if shape.has_table:
@@ -45,16 +45,11 @@ def extraction(filename):
                             for t in c.text_frame.paragraphs:
                                 txt += t.text
                             strings = getUiString(txt)
-                            # strings = re.findall(r'“(.*?)”', txt)
-                            # strings += re.findall(r'"(.*?)"', txt)
                             for s in strings:
                                 result.append([i, title, s])
 
                 if hasattr(shape, "text"):
                     strings = getUiString(shape.text)
-                    # strings = re.findall(r'“(.*?)”', shape.text)
-                    # strings += re.findall(r'"(.*?)"', shape.text)
-                    #                     print(strings)
                     for s in strings:
                         result.append([i, title, s])
 

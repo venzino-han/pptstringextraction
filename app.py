@@ -1,6 +1,6 @@
-from flask import Flask, render_template, url_for, request, send_file, after_this_request
+from flask import Flask, render_template, url_for, request, send_file, after_this_request, redirect
 from werkzeug.utils import secure_filename
-import os
+import os, io
 from extraction import extraction
 
 app= Flask(__name__)
@@ -26,7 +26,14 @@ def downloadFile (filename):
     cwd = os.getcwd()
     newFileName = extraction(filename)
     path = os.path.join(cwd, newFileName)
-    return send_file(path, as_attachment=True)
+
+    return_data = io.BytesIO()
+    with open(path, 'rb') as fo:
+        return_data.write(fo.read())
+    return_data.seek(0)
+    os.remove(path)
+
+    return send_file(return_data, attachment_filename=newFileName , as_attachment=True)
 
 
 if __name__ == "__main__":

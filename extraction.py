@@ -5,15 +5,23 @@ import re
 import os
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
+# extract text between Double quotes
+def getUiString(shape_txt):
+    str = re.findall(r'“(.*?)”', shape_txt)
+    str += re.findall(r'"(.*?)"', shape_txt)
+    return str
 
-def getGroupText(groupShape,strings):
+# extract text between Double quotes
+def getGroupText(groupShape, strings):
     for shape in groupShape.shapes:
         if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
-            getGroupText(shape,strings)
+            getGroupText(shape, strings)
         else:
             if hasattr(shape, "text"):
-                str = re.findall(r'“(.*?)”', shape.text)
-                strings += str
+                strings += getUiString(shape.text)
+                # str = re.findall(r'“(.*?)”', shape.text)
+                # strings += str
+                # strings += re.findall(r'"(.*?)"', shape.text)
     return strings
 
 
@@ -27,6 +35,7 @@ def extraction(filename):
             continue
         else:
             title = slide.shapes.title.text
+
             for shape in slide.shapes:
                 if shape.has_table:
                     table = shape.table
@@ -35,23 +44,31 @@ def extraction(filename):
                             txt = ''
                             for t in c.text_frame.paragraphs:
                                 txt += t.text
-                            strings = re.findall(r'“(.*?)”', txt)
+                            strings = getUiString(txt)
+                            # strings = re.findall(r'“(.*?)”', txt)
+                            # strings += re.findall(r'"(.*?)"', txt)
                             for s in strings:
                                 result.append([i, title, s])
 
                 if hasattr(shape, "text"):
-                    strings = re.findall(r'“(.*?)”', shape.text)
+                    strings = getUiString(shape.text)
+                    # strings = re.findall(r'“(.*?)”', shape.text)
+                    # strings += re.findall(r'"(.*?)"', shape.text)
+                    #                     print(strings)
                     for s in strings:
                         result.append([i, title, s])
 
                 if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
                     strings = []
-                    strings = getGroupText(shape,strings)
+                    strings = getGroupText(shape, strings)
                     for s in strings:
                         result.append([i, title, s])
 
     df = pd.DataFrame(result)
-    newFileName = filename[:-4]+'csv'
+    newFileName = filename[:-4] + 'csv'
     os.remove(filename)
-    df.to_csv(newFileName, encoding="euc-kr")
+    try:
+        df.to_csv(newFileName, encoding="euc-kr")
+    except:
+        df.to_csv(newFileName, encoding="UTF8")
     return newFileName
